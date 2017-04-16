@@ -1,0 +1,19 @@
+{
+  "name": "dehare/scphp",
+  "description": "Squeezebox CLI PHP",
+  "authors": [
+    {
+      "name": "Valentijn Verhallen",
+      "email": "contact@valentijn.co"
+    }
+  ],
+  "require": {
+    "php": ">=5.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "Dehare\\SCPHP\\": "lib/"
+    }
+  },
+  "minimum-stability": "dev"
+}
