@@ -79,7 +79,7 @@ class Connection
                 throw new ConnectionException('Login required', 401);
             }
 
-            $success = Request::command('login '.self::$username.' '.self::$password);
+            $success = Request::execute('login '.self::$username.' '.self::$password);
             if (!$success) {
                 throw new ConnectionException('Login failed', 406);
             }

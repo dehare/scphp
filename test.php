@@ -2,22 +2,16 @@
 require_once  'vendor/autoload.php';
 
 
-use Dehare\SCPHP;
+use Dehare\SCPHP\Request;
 
-$conn = new SCPHP\Connection('192.168.1.50');
+$conn = new \Dehare\SCPHP\Connection('192.168.1.50');
 
 // concept testing
-$status = explode(' ', SCPHP\Request::command('serverstatus 0 10'));
-$result = [];
-array_walk($status, function($v) use (&$result) {
-    $v = urldecode($v);
-    $result[strstr($v, ':', true)] = ltrim(strstr($v, ':'), ':');
-});
-
-var_dump($result);
+$status = Request::query('status');
+var_dump($status);
 
 // concept proof
-var_dump(SCPHP\Request::query('database:albums', [], []));
+var_dump(Request::query('database:albums', [], []));
 
 // fill empty tags with null data
-var_dump(SCPHP\Request::query('database:albums', [], ['fill_tags' => true]));
+var_dump(Request::query('database:albums', [], ['fill_tags' => true]));

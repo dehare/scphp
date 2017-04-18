@@ -1,6 +1,6 @@
 <?php
 
-use Dehare\SCPHP\Request;
+use Dehare\SCPHP\Command\Command;
 
 /**
  * Parameters: key / default value
@@ -9,12 +9,12 @@ use Dehare\SCPHP\Request;
 
 $cmd = [
     'info'     => [
-        'query'   => Request::QUERY_INT,
+        'query'   => Command::QUERY_INT,
         'prefix'  => 'total',
         'options' => ['genres', 'artists', 'albums', 'songs', 'duration'],
     ],
     'genres'   => [
-        'query'      => Request::QUERY_ARRAY,
+        'query'      => Command::QUERY_ARRAY,
         'limit'      => 50,
         'parameters' => [
             'search'    => null,
@@ -25,13 +25,14 @@ $cmd = [
             'year'      => null,
         ],
         'tags'       => [
-            's' => ['textkey', '.{1}'],
+            's' => 'textkey',
+            //'s' => ['textkey', '.{1}'],
             '_' => null,
         ],
         'response'   => ['id', 'genre'],
     ],
     'artists'  => [
-        'query'      => Request::QUERY_ARRAY,
+        'query'      => Command::QUERY_ARRAY,
         'limit'      => 50,
         'parameters' => [
             'search'    => null,
@@ -47,7 +48,7 @@ $cmd = [
         'response'   => ['id', 'artist'],
     ],
     'albums'   => [
-        'query'      => Request::QUERY_ARRAY,
+        'query'      => Command::QUERY_ARRAY,
         'limit'      => 25,
         'parameters' => [
             'search'      => null,
@@ -63,23 +64,34 @@ $cmd = [
             ],
         ],
         'tags'       => [
-            'l' => ['album', '.+'],
-            'y' => ['year', '\d+'],
-            'j' => ['artwork_track_id', '\w+'],
-            't' => ['title', '.+'],
-            'i' => ['disc', '\d+'],
-            'q' => ['disccount', '\d+'],
-            'w' => ['compilation', '\d'],
-            'a' => ['artist', '.+'],
-            'S' => ['artist_id', '\d+'],
-            's' => ['textkey', '.{1}'],
-            'X' => ['album_replay_gain', '\d+'],
+            'l' => 'album',
+            //'l' => ['album', '.+'],
+            'y' => 'year',
+            //'y' => ['year', '\d+'],
+            'j' => 'artwork_track_id',
+            //'j' => ['artwork_track_id', '\w+'],
+            't' => 'title',
+            //'t' => ['title', '.+'],
+            'i' => 'disc',
+            //'i' => ['disc', '\d+'],
+            'q' => 'disccount',
+            //'q' => ['disccount', '\d+'],
+            'w' => 'compilation',
+            //'w' => ['compilation', '\d'],
+            'a' => 'artist',
+            //'a' => ['artist', '.+'],
+            'S' => 'artist_id',
+            //'S' => ['artist_id', '\d+'],
+            's' => 'textkey',
+            //'s' => ['textkey', '.{1}'],
+            'X' => 'album_replay_gain',
+            //'X' => ['album_replay_gain', '\d+'],
             '_' => '*',
         ],
         'response'   => ['id', 'album'],
     ],
     'years'    => [
-        'query'      => Request::QUERY_ARRAY,
+        'query'      => Command::QUERY_ARRAY,
         'limit'      => 100,
         'parameters' => [
             'hasAlbums' => 1,
@@ -90,7 +102,7 @@ $cmd = [
         'options'    => ['bare'],
     ],
     'songinfo' => [
-        'query'      => Request::QUERY_ARRAY,
+        'query'      => Command::QUERY_ARRAY,
         'parameters' => [
             'url'      => null,
             'track_id' => null,
@@ -141,7 +153,7 @@ $cmd = [
         'response'   => ['id', 'title'],
     ],
     'titles'   => [
-        'query'      => Request::QUERY_ARRAY,
+        'query'      => Command::QUERY_ARRAY,
         'parameters' => [
             'search'    => null,
             'genre_id'  => null,

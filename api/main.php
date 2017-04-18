@@ -1,10 +1,15 @@
 <?php
 
-use Dehare\SCPHP\Request;
+use Dehare\SCPHP\Command\Command;
 
 return [
+    'status'  => [
+        'command' => 'serverstatus',
+        'limit'   => 5,
+        'query'   => Command::QUERY_ARRAY,
+    ],
     'secured' => [
         'command' => 'pref authorize ?',
-        'query'   => Request::QUERY_BOOL,
+        'query'   => Command::QUERY_BOOL,
     ],
 ];
