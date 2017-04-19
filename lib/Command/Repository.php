@@ -2,7 +2,9 @@
 
 namespace Dehare\SCPHP\Command;
 
-class CommandRepository
+use Dehare\SCPHP\API;
+
+class Repository
 {
     private $configuration = [];
     private $history       = [];
@@ -15,16 +17,7 @@ class CommandRepository
      */
     public function __construct($key)
     {
-        if (is_array($key)) {
-            $this->configuration = $key;
-        } else {
-            $path = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'api' . DIRECTORY_SEPARATOR . $key . '.php';
-            if (! is_file($path)) {
-                throw new \InvalidArgumentException("Could not initialize repo for \"$key\".", 404);
-            }
-            $this->configuration = (include $path);
-        }
-
+        $this->configuration = is_array($key) ? $key : API::getConfig($key);
         $this->validateConfiguration();
     }
 

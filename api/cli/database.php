@@ -96,10 +96,8 @@ $cmd = [
         'parameters' => [
             'hasAlbums' => 1,
         ],
-        'response'   => [
-            'year' => '\d+',
-        ],
-        'options'    => ['bare'],
+        'response'   => ['year'],
+        'flags'    => [\Dehare\SCPHP\API::FLAG_UNWRAP_KEYS],
     ],
     'songinfo' => [
         'query'      => Command::QUERY_ARRAY,

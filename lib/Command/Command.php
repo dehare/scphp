@@ -2,7 +2,6 @@
 
 namespace Dehare\SCPHP\Command;
 
-use Dehare\SCPHP\Command\CommandRepository as Repository;
 use Dehare\SCPHP\Exception\CommandException;
 
 class Command
@@ -81,6 +80,21 @@ class Command
         return $keys;
     }
 
+    /**
+     * Gets defaults flags for command
+     * @return array
+     */
+    public function getFlags()
+    {
+        $result = [];
+        $flags  = ! empty($this->config['flags']) ? $this->config['flags'] : [];
+        foreach ($flags as $flag) {
+            $result[$flag] = true;
+        }
+
+        return $result;
+    }
+
     public function isReady()
     {
         return $this->ready;
@@ -89,9 +103,9 @@ class Command
     /**
      * @param       $command
      * @param array $params
-     * @param array $options
+     * @param array $flags
      */
-    public function compile(array $params = [], array $options = [])
+    public function compile(array $params = [])
     {
         $this->command = $this->escaped = $this->key;
 
@@ -103,9 +117,10 @@ class Command
             $this->append($this->config['prepend']);
         }
         if (! empty($this->config['limit'])) {
-            $this->append(isset($options['start']) ? $options['start'] : 0);
-            $this->append(isset($options['limit']) ? $options['limit'] : $this->config['limit']);
+            $this->append(isset($params['start']) ? $params['start'] : 0);
+            $this->append(isset($params['limit']) ? $params['limit'] : $this->config['limit']);
         }
+        unset($params['start'], $params['limit']);
 
         if (! empty($this->config['command'])) {
             $this->finishCommand();

@@ -12,7 +12,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Dehare\\SCPHP\\": "lib/"
+      "Dehare\\SCPHP\\": ["lib/", "api/"]
     }
   },
   "minimum-stability": "dev"
