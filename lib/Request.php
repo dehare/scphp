@@ -3,8 +3,7 @@
 namespace Dehare\SCPHP;
 
 use Dehare\SCPHP\Command\Command;
-use Dehare\SCPHP\Command\CommandRepository;
-use Dehare\SCPHP\Exception\RequestException;
+use Dehare\SCPHP\Command\Repository;
 
 class Request
 {
@@ -17,32 +16,37 @@ class Request
      */
     private static $_cmd = null;
 
-    public static function query($key, array $filters = [], array $options = [])
+    public static function query($key, array $params = [], array $flags = [])
     {
         self::setup($key);
-        self::$_cmd->compile($filters, $options);
+        self::$_cmd->compile($params);
 
-        $data = self::execute();
-        switch (self::$_cmd->getQuery()) {
-            case Command::QUERY_ARRAY:
-                $result = self::getArray($data, $options);
-                break;
-            case Command::QUERY_BOOL:
-                $result = self::validateBoolean($data);
-                break;
-            case Command::QUERY_SUCCESS:
-                $result = ! empty($data);
-                break;
-            case Command::QUERY_INT:
-                $result = self::validateInteger($data);
-                break;
-            default:
-                $result = $data;
+        $data  = self::execute();
+        $flags = API::filterFlags(self::$_cmd, $flags);
+
+        if (! in_array(API::FLAG_RAW, $flags)) {
+            switch (self::$_cmd->getQuery()) {
+                case Command::QUERY_ARRAY:
+                    $result = self::getArray($data, $flags);
+                    break;
+                case Command::QUERY_BOOL:
+                    $result = self::validateBoolean($data);
+                    break;
+                case Command::QUERY_SUCCESS:
+                    $result = ! empty($data);
+                    break;
+                case Command::QUERY_INT:
+                    $result = self::validateInteger($data);
+                    break;
+                default:
+                    $result = $data;
+            }
         }
+
         self::$_repos[self::$_active_repo]->registerCommand(self::$_cmd);
         self::$_cmd = null;
 
-        return $result;
+        return isset($result) ? $result : $data;
     }
 
     /**
@@ -55,22 +59,30 @@ class Request
     {
     }
 
-    public function getArray($data, array $options = [])
+    public function getArray($data, array $flags = [])
     {
-        $results   = [];
+        $results = [];
+        if (in_array(API::FLAG_COUNT_ONLY, $flags)) {
+            preg_match('/\scount%3A(\d+)$/', $data, $m);
+            $results['count'] = ! empty($m[1]) ? $m[1] : -1;
+
+            return $results;
+        }
+
         $delimiter = self::$_cmd->getDelimiter();
 
         $data = $delimiter ? array_filter(explode(' ' . $delimiter, ' ' . $data)) : (array)$data;
-        foreach ($data as $result) {
-            $columns    = explode(' ', $result);
-            $columns[0] = $delimiter . $columns[0];
+        foreach ($data as $d) {
             $line       = [];
+            $columns    = explode(' ', $d);
+            $columns[0] = $delimiter . $columns[0];
+            
             array_walk($columns, function ($v) use (&$line) {
                 $v                           = urldecode($v);
                 $line[strstr($v, ':', true)] = ltrim(strstr($v, ':'), ':');
             });
 
-            if (! empty($options['fill_tags'])) {
+            if (in_array(API::FLAG_FILL_KEYS, $flags)) {
                 $keys = self::$_cmd->getResponseKeys();
                 array_walk($keys, function ($key) use (&$line) {
                     if (! isset($line[$key])) {
@@ -82,14 +94,29 @@ class Request
             $results[] = $line;
         }
 
-        $rc    = count($results);
-        //$count = -1;
+        $rc = count($results);
         if (! empty($results) && ! empty($results[$rc - 1]['count'])) {
             $count = $results[$rc - 1]['count'];
             unset($results[$rc - 1]['count']);
         }
 
-        return compact('results', 'count');
+        if (in_array(API::FLAG_UNWRAP_KEYS, $flags)) {
+            $keys = self::$_cmd->getResponseKeys();
+            if (count($keys) == 1) {
+                $result = array_column($results, $keys[0]);
+            }
+        }
+
+        if (! isset($result)) {
+            $result = compact('results', 'count');
+            if (in_array(API::FLAG_UNWRAP, $flags)) {
+                if (count($results) == 1) {
+                    $result = $results[0];
+                }
+            }
+        }
+
+        return $result;
     }
 
     public function validateBoolean($data)
@@ -139,7 +166,7 @@ class Request
             return self::$_repos[$key];
         }
 
-        $repo               = new CommandRepository($key);
+        $repo               = new Repository($key);
         self::$_repos[$key] = $repo;
         self::$_active_repo = $key;
 
