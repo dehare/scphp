@@ -9,9 +9,10 @@ use Dehare\SCPHP\Command\Command;
 
 $cmd = [
     'info'     => [
-        'query'   => Command::QUERY_INT,
-        'prefix'  => 'total',
-        'options' => ['genres', 'artists', 'albums', 'songs', 'duration'],
+        'query'    => Command::QUERY_INT,
+        'prefix'   => 'total',
+        'suffix'   => '?',
+        'commands' => ['genres', 'artists', 'albums', 'songs', 'duration'],
     ],
     'genres'   => [
         'query'      => Command::QUERY_ARRAY,
@@ -26,7 +27,6 @@ $cmd = [
         ],
         'tags'       => [
             's' => 'textkey',
-            //'s' => ['textkey', '.{1}'],
             '_' => null,
         ],
         'response'   => ['id', 'genre'],
@@ -65,27 +65,16 @@ $cmd = [
         ],
         'tags'       => [
             'l' => 'album',
-            //'l' => ['album', '.+'],
             'y' => 'year',
-            //'y' => ['year', '\d+'],
             'j' => 'artwork_track_id',
-            //'j' => ['artwork_track_id', '\w+'],
             't' => 'title',
-            //'t' => ['title', '.+'],
             'i' => 'disc',
-            //'i' => ['disc', '\d+'],
             'q' => 'disccount',
-            //'q' => ['disccount', '\d+'],
             'w' => 'compilation',
-            //'w' => ['compilation', '\d'],
             'a' => 'artist',
-            //'a' => ['artist', '.+'],
             'S' => 'artist_id',
-            //'S' => ['artist_id', '\d+'],
             's' => 'textkey',
-            //'s' => ['textkey', '.{1}'],
             'X' => 'album_replay_gain',
-            //'X' => ['album_replay_gain', '\d+'],
             '_' => '*',
         ],
         'response'   => ['id', 'album'],
@@ -97,7 +86,7 @@ $cmd = [
             'hasAlbums' => 1,
         ],
         'response'   => ['year'],
-        'flags'    => [\Dehare\SCPHP\API::FLAG_UNWRAP_KEYS],
+        'flags'      => [\Dehare\SCPHP\API::FLAG_UNWRAP_KEYS],
     ],
     'songinfo' => [
         'query'      => Command::QUERY_ARRAY,
