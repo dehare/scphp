@@ -8,12 +8,21 @@
     }
   ],
   "require": {
-    "php": ">=5.6"
+    "php": ">=5.6",
+    "symfony/cache": "^3.2"
   },
   "autoload": {
     "psr-4": {
       "Dehare\\SCPHP\\": ["lib/", "api/"]
     }
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "chmod 777 cache"
+    ],
+    "post-update-cmd": [
+      "chmod 777 cache"
+    ]
   },
   "minimum-stability": "dev"
 }
