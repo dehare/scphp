@@ -13,4 +13,12 @@ return [
         '_command' => 'pref authorize ?',
         'query'    => Command::QUERY_BOOL,
     ],
+    'login' => [
+        'parameters' => [
+            'username' => null,
+            'password' => null,
+        ],
+        'requirements' => ['username', 'password'],
+        'filters' => [\Dehare\SCPHP\API::FILTER_KEYLESS],
+    ],
 ];
