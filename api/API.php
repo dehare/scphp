@@ -12,6 +12,8 @@ class API
     const FLAG_COUNT_ONLY  = 'count_only';
     const FLAG_UNWRAP_KEYS = 'unwrap_keys';
 
+    const FILTER_KEYLESS = 1;
+
     private static $cli = [];
 
     /**

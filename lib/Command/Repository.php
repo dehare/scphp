@@ -53,6 +53,7 @@ class Repository
         foreach ($this->configuration as &$cmd) {
             $cmd['response'] = ! empty($cmd['response']) ? $cmd['response'] : [];
             $cmd['tags']     = ! empty($cmd['tags']) ? $cmd['tags'] : [];
+            $cmd['filters']  = ! empty($cmd['filters']) ? $cmd['filters'] : [];
             $cmd['limit']    = ! empty($cmd['limit']) ? $cmd['limit'] : false;
             $cmd['query']    = ! empty($cmd['query']) ? $cmd['query'] : Command::QUERY_SUCCESS;
         }

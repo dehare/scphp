@@ -155,6 +155,24 @@ $cmd = [
         ],
         'response'   => [],
     ],
+    'folder'   => [
+        'query'      => Command::QUERY_ARRAY,
+        '_command'   => 'musicfolder',
+        'parameters' => [
+            'folder_id'  => null,
+            'return_top' => false,
+            'url'        => null,
+            'type'       => [
+                'options' => ['audio', 'video', 'image', 'list'],
+                '_'       => 'audio',
+            ],
+        ],
+        'tags'       => [
+            's' => 'textkey',
+            'u' => 'url',
+            '_' => ['u'],
+        ],
+    ],
 ];
 
 $cmd['titles']['tags'] = $cmd['songinfo']['tags'];

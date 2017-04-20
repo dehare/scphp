@@ -2,6 +2,7 @@
 
 namespace Dehare\SCPHP\Command;
 
+use Dehare\SCPHP\API;
 use Dehare\SCPHP\Exception\CommandException;
 use Dehare\SCPHP\Exception\InvalidCommandException;
 
@@ -133,15 +134,9 @@ class Command
         }
         unset($params['start'], $params['limit']);
 
-        if (! empty($this->config['_command'])) {
-            $this->finishCommand();
-
-            return;
-        }
-
         if (! empty($params['command']) && ! empty($this->config['commands'])) {
             if (! in_array($params['command'], $this->config['commands'])) {
-                throw new InvalidCommandException('Illegal command "' . $params['command'] . '" supplied ' . $this->getKey(), 500);
+                throw new InvalidCommandException('Illegal command "' . $params['command'] . '" supplied ' . $this->key, 500);
             }
             $this->append($params['command']);
         };
@@ -170,6 +165,8 @@ class Command
                 if (isset($value)) {
                     $this->setParam($p, $value);
                     unset($value);
+                } else if ($this->requiredParameter($p)) {
+                    throw new CommandException('Missing required parameter "'.$p.'" for "'.$this->key.'"');
                 }
             }
         }
@@ -208,9 +205,15 @@ class Command
         $this->params[$key] = $value;
     }
 
+    private function requiredParameter($key)
+    {
+        return !empty($this->config['requirements']) && in_array($key, $this->config['requirements']);
+    }
+
     private function finishCommand()
     {
         $this->escaped = $this->command;
+        $keyless = in_array(API::FILTER_KEYLESS, $this->config['filters']);
 
         foreach ($this->params as $key => $value) {
             if ($key == 'tags') {
@@ -218,8 +221,9 @@ class Command
             }
             $value = (is_bool($value) ? intval($value) : rawurlencode($value));
 
-            $this->command .= " $key:$value";
-            $this->escaped .= " $key%3A$value";
+
+            $this->command .= ' '. ($keyless ? $value : "$key:$value");
+            $this->escaped .= ' '. ($keyless ? $value : "$key%3A$value");
         }
 
         if (! empty($this->config['suffix'])) {
