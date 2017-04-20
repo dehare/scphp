@@ -14,6 +14,13 @@ class API
 
     private static $cli = [];
 
+    /**
+     * Get API configuration for an endpoint
+     *
+     * @param $key
+     *
+     * @return array
+     */
     public static function getConfig($key)
     {
         if (! isset(self::$cli[$key])) {
@@ -28,8 +35,10 @@ class API
     }
 
     /**
-     * Get possible flags
+     * Get possible flags for query type
+     *
      * @param int|null $query Get flags applicable to this query type
+     *
      * @return array [Flag => [application, description]]
      */
     public static function getFlags($query = null)
@@ -45,6 +54,14 @@ class API
         return $result;
     }
 
+    /**
+     * Filter supplied flags for command
+     *
+     * @param Command $command
+     * @param array   $flags
+     *
+     * @return array
+     */
     public static function filterFlags(Command $command, array $flags)
     {
         $query         = $command->getQuery();

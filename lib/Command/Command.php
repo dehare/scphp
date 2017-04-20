@@ -64,6 +64,13 @@ class Command
         return ! empty($keys) ? $keys[0] : null;
     }
 
+    /**
+     * Get all keys available to command
+     *
+     * Keys change by the specification of tags
+     *
+     * @return array
+     */
     public function getResponseKeys()
     {
         $keys = $this->config['response'];
@@ -102,9 +109,12 @@ class Command
     }
 
     /**
-     * @param       $command
+     * Compile a command
+     *
+     * Command looks at its configuration and loops through parameters
+     * applying static and user defined parameters
+     *
      * @param array $params
-     * @param array $flags
      */
     public function compile(array $params = [])
     {
@@ -188,17 +198,17 @@ class Command
         $this->finishCommand();
     }
 
-    public function append($value)
+    private function append($value)
     {
         $this->command .= ' ' . $value;
     }
 
-    public function setParam($key, $value)
+    private function setParam($key, $value)
     {
         $this->params[$key] = $value;
     }
 
-    public function finishCommand()
+    private function finishCommand()
     {
         $this->escaped = $this->command;
 

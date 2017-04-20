@@ -16,6 +16,17 @@ class Request
      */
     private static $_cmd = null;
 
+    /**
+     * Send and parse command from known commands
+     *
+     * @param string $key
+     * @param array  $params
+     * @param array  $flags
+     *
+     * @return array|bool|int|mixed|string
+     *
+     * @todo add link to docs
+     */
     public static function query($key, array $params = [], array $flags = [])
     {
         self::setup($key, $params);
@@ -24,7 +35,7 @@ class Request
         $data  = self::execute();
         $flags = API::filterFlags(self::$_cmd, $flags);
 
-        if (!in_array(API::FLAG_RAW, $flags)) {
+        if (! in_array(API::FLAG_RAW, $flags)) {
             switch (self::$_cmd->getQuery()) {
                 case Command::QUERY_ARRAY:
                     $result = self::getArray($data, $flags);
@@ -33,7 +44,7 @@ class Request
                     $result = self::validateBoolean($data);
                     break;
                 case Command::QUERY_SUCCESS:
-                    $result = !empty($data);
+                    $result = ! empty($data);
                     break;
                 case Command::QUERY_INT:
                     $result = self::validateInteger($data);
@@ -60,6 +71,14 @@ class Request
     {
     }
 
+    /**
+     * Parse result to array
+     *
+     * @param string $data
+     * @param array  $flags Data transformers
+     *
+     * @return array
+     */
     public function getArray($data, array $flags = [])
     {
         $results = [];
@@ -69,7 +88,7 @@ class Request
                 $count = $m[1];
             }
 
-            return intval($count);
+            return ['count' => intval($count)];
         }
 
         $delimiter = self::$_cmd->getDelimiter();
@@ -88,7 +107,7 @@ class Request
             if (in_array(API::FLAG_FILL_KEYS, $flags)) {
                 $keys = self::$_cmd->getResponseKeys();
                 array_walk($keys, function ($key) use (&$line) {
-                    if (!isset($line[$key])) {
+                    if (! isset($line[$key])) {
                         $line[$key] = null;
                     }
                 });
@@ -98,7 +117,7 @@ class Request
         }
 
         $rc = count($results);
-        if (!empty($results) && !empty($results[$rc - 1]['count'])) {
+        if (! empty($results) && ! empty($results[$rc - 1]['count'])) {
             $count = $results[$rc - 1]['count'];
             unset($results[$rc - 1]['count']);
         }
@@ -110,7 +129,7 @@ class Request
             }
         }
 
-        if (!isset($result)) {
+        if (! isset($result)) {
             $result = compact('results', 'count');
             if (in_array(API::FLAG_UNWRAP, $flags)) {
                 if (count($results) == 1) {
@@ -122,6 +141,13 @@ class Request
         return $result;
     }
 
+    /**
+     * Parse data to boolean
+     *
+     * @param string $data
+     *
+     * @return bool
+     */
     public function validateBoolean($data)
     {
         if (preg_match('/(\w\s)+/', $data)) {
@@ -133,6 +159,13 @@ class Request
         return filter_var($data, FILTER_VALIDATE_BOOLEAN);
     }
 
+    /**
+     * Parse data to integer
+     *
+     * @param string $data
+     *
+     * @return int
+     */
     public function validateInteger($data)
     {
         if (preg_match('/(\d)+/', $data, $m)) {
@@ -142,9 +175,16 @@ class Request
         return 0;
     }
 
+    /**
+     * Send command to CLI and parse resultset to usable data
+     *
+     * @param Command|null $command
+     *
+     * @return string
+     */
     public static function execute(Command $command = null)
     {
-        if (!empty($command)) {
+        if (! empty($command)) {
             self::$_cmd = $command;
         }
 
@@ -161,13 +201,19 @@ class Request
         return trim($result);
     }
 
+    /**
+     * Initialize command
+     *
+     * @param string $command
+     * @param array  $params
+     */
     private static function setup($command, array &$params)
     {
         $repo = self::$_active_repo;
         if (strpos($command, ':')) {
             preg_match('/(\w+):(\w+):?(\w+)?/', $command, $match);
             list($input, $repo, $command) = $match;
-            if (!empty($match[3])) {
+            if (! empty($match[3])) {
                 $params['command'] = $match[3];
             }
         }
@@ -176,6 +222,13 @@ class Request
         self::$_cmd = new Command($repository, $command);
     }
 
+    /**
+     * Initialize command repository
+     *
+     * @param string $key
+     *
+     * @return Repository
+     */
     private static function repository($key)
     {
         if (isset(self::$_repos[$key])) {

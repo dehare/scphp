@@ -11,9 +11,8 @@ class Repository
 
     /**
      * CommandRepository constructor.
-     * @param $key
      *
-     * @todo parse / validate configuration
+     * @param $key
      */
     public function __construct($key)
     {
@@ -37,6 +36,11 @@ class Repository
         return $this->configuration[$key];
     }
 
+    /**
+     * Add a completed command to history
+     *
+     * @param Command $command
+     */
     public function registerCommand(Command $command)
     {
         if ($command->isReady()) {
