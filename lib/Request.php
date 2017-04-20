@@ -18,13 +18,13 @@ class Request
 
     public static function query($key, array $params = [], array $flags = [])
     {
-        self::setup($key);
+        self::setup($key, $params);
         self::$_cmd->compile($params);
 
         $data  = self::execute();
         $flags = API::filterFlags(self::$_cmd, $flags);
 
-        if (! in_array(API::FLAG_RAW, $flags)) {
+        if (!in_array(API::FLAG_RAW, $flags)) {
             switch (self::$_cmd->getQuery()) {
                 case Command::QUERY_ARRAY:
                     $result = self::getArray($data, $flags);
@@ -33,7 +33,7 @@ class Request
                     $result = self::validateBoolean($data);
                     break;
                 case Command::QUERY_SUCCESS:
-                    $result = ! empty($data);
+                    $result = !empty($data);
                     break;
                 case Command::QUERY_INT:
                     $result = self::validateInteger($data);
@@ -51,6 +51,7 @@ class Request
 
     /**
      * Stub for simple post
+     *
      * @param $key
      *
      * @todo
@@ -63,10 +64,12 @@ class Request
     {
         $results = [];
         if (in_array(API::FLAG_COUNT_ONLY, $flags)) {
-            preg_match('/\scount%3A(\d+)$/', $data, $m);
-            $results['count'] = ! empty($m[1]) ? $m[1] : -1;
+            $count = -1;
+            if (preg_match('/count%3A(\d+)$/', $data, $m)) {
+                $count = $m[1];
+            }
 
-            return $results;
+            return intval($count);
         }
 
         $delimiter = self::$_cmd->getDelimiter();
@@ -76,7 +79,7 @@ class Request
             $line       = [];
             $columns    = explode(' ', $d);
             $columns[0] = $delimiter . $columns[0];
-            
+
             array_walk($columns, function ($v) use (&$line) {
                 $v                           = urldecode($v);
                 $line[strstr($v, ':', true)] = ltrim(strstr($v, ':'), ':');
@@ -85,7 +88,7 @@ class Request
             if (in_array(API::FLAG_FILL_KEYS, $flags)) {
                 $keys = self::$_cmd->getResponseKeys();
                 array_walk($keys, function ($key) use (&$line) {
-                    if (! isset($line[$key])) {
+                    if (!isset($line[$key])) {
                         $line[$key] = null;
                     }
                 });
@@ -95,7 +98,7 @@ class Request
         }
 
         $rc = count($results);
-        if (! empty($results) && ! empty($results[$rc - 1]['count'])) {
+        if (!empty($results) && !empty($results[$rc - 1]['count'])) {
             $count = $results[$rc - 1]['count'];
             unset($results[$rc - 1]['count']);
         }
@@ -107,7 +110,7 @@ class Request
             }
         }
 
-        if (! isset($result)) {
+        if (!isset($result)) {
             $result = compact('results', 'count');
             if (in_array(API::FLAG_UNWRAP, $flags)) {
                 if (count($results) == 1) {
@@ -130,9 +133,18 @@ class Request
         return filter_var($data, FILTER_VALIDATE_BOOLEAN);
     }
 
+    public function validateInteger($data)
+    {
+        if (preg_match('/(\d)+/', $data, $m)) {
+            return intval($m[1]);
+        }
+
+        return 0;
+    }
+
     public static function execute(Command $command = null)
     {
-        if (! empty($command)) {
+        if (!empty($command)) {
             self::$_cmd = $command;
         }
 
@@ -149,11 +161,15 @@ class Request
         return trim($result);
     }
 
-    private static function setup($command)
+    private static function setup($command, array &$params)
     {
         $repo = self::$_active_repo;
         if (strpos($command, ':')) {
-            list($repo, $command) = explode(':', $command);
+            preg_match('/(\w+):(\w+):?(\w+)?/', $command, $match);
+            list($input, $repo, $command) = $match;
+            if (!empty($match[3])) {
+                $params['command'] = $match[3];
+            }
         }
 
         $repository = self::repository($repo ?: 'main');

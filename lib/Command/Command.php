@@ -3,6 +3,7 @@
 namespace Dehare\SCPHP\Command;
 
 use Dehare\SCPHP\Exception\CommandException;
+use Dehare\SCPHP\Exception\InvalidCommandException;
 
 class Command
 {
@@ -109,12 +110,12 @@ class Command
     {
         $this->command = $this->escaped = $this->key;
 
-        if (! empty($this->config['command'])) {
-            $this->command = $this->escaped = $this->config['command'];
+        if (! empty($this->config['_command'])) {
+            $this->command = $this->escaped = $this->config['_command'];
         }
 
-        if (! empty($this->config['prepend'])) {
-            $this->append($this->config['prepend']);
+        if (! empty($this->config['prefix'])) {
+            $this->append($this->config['prefix']);
         }
         if (! empty($this->config['limit'])) {
             $this->append(isset($params['start']) ? $params['start'] : 0);
@@ -122,11 +123,18 @@ class Command
         }
         unset($params['start'], $params['limit']);
 
-        if (! empty($this->config['command'])) {
+        if (! empty($this->config['_command'])) {
             $this->finishCommand();
 
             return;
         }
+
+        if (! empty($params['command']) && ! empty($this->config['commands'])) {
+            if (! in_array($params['command'], $this->config['commands'])) {
+                throw new InvalidCommandException('Illegal command "' . $params['command'] . '" supplied ' . $this->getKey(), 500);
+            }
+            $this->append($params['command']);
+        };
 
         // set params from filters
         if (! empty($this->config['parameters'])) {
@@ -177,7 +185,6 @@ class Command
 
             $this->setParam('tags', $tags);
         }
-
         $this->finishCommand();
     }
 
@@ -204,6 +211,12 @@ class Command
             $this->command .= " $key:$value";
             $this->escaped .= " $key%3A$value";
         }
+
+        if (! empty($this->config['suffix'])) {
+            $this->command .= ' ' . $this->config['suffix'];
+            $this->escaped .= ' ' . $this->config['suffix'];
+        }
+
 
         $this->command = trim($this->command);
         $this->escaped = trim($this->escaped);
