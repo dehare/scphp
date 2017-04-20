@@ -45,6 +45,7 @@ final class Connection
     }
 
     /**
+     * Get CLI connection
      * @return resource
      */
     public static function socket()
@@ -56,6 +57,12 @@ final class Connection
         return self::$connection;
     }
 
+    /**
+     * Connect to CLI
+     *
+     * @return bool
+     * @throws ConnectionException
+     */
     public static function connect()
     {
         self::$cache = new FilesystemAdapter('', 604800, __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'cache');
@@ -99,6 +106,8 @@ final class Connection
 
     /**
      * Loop through network searching for valid LMS host
+     *
+     * Saved host and port to cache file for future connections
      */
     private static function findServer()
     {
@@ -150,6 +159,14 @@ final class Connection
         }
     }
 
+    /**
+     * Test a host for applicable CLI ports
+     *
+     * @param       $ip_addr
+     * @param array $ports
+     *
+     * @return bool|mixed
+     */
     private function knockIP($ip_addr, array $ports)
     {
         foreach ($ports as $port) {
@@ -162,7 +179,15 @@ final class Connection
         return false;
     }
 
-    private static function saveCredentials($username, $password)
+    /**
+     * Save login credentials to cache
+     *
+     * Intended to be called from client application
+     *
+     * @param string $username
+     * @param string $password
+     */
+    public static function saveCredentials($username, $password)
     {
         if (! self::$cache) {
             self::$cache = new FilesystemAdapter('', 604800, __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'cache');
