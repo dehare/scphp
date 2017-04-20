@@ -113,14 +113,22 @@ class Request
                 });
             }
 
-            $results[] = $line;
+            $line = array_filter($line, function ($v) {
+                return (is_array($v) && ! empty($v)) || $v != '';
+            });
+
+            if (! empty($line)) {
+                $results[] = $line;
+            }
         }
 
+
         $rc = count($results);
-        if (! empty($results) && ! empty($results[$rc - 1]['count'])) {
+        if (! empty($results) && isset($results[$rc - 1]['count'])) {
             $count = $results[$rc - 1]['count'];
             unset($results[$rc - 1]['count']);
         }
+        $results = array_filter($results);
 
         if (in_array(API::FLAG_UNWRAP_KEYS, $flags)) {
             $keys = self::$_cmd->getResponseKeys();
