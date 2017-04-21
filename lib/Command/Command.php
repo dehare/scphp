@@ -58,6 +58,11 @@ class Command
         return ! empty($this->config['query']) ? $this->config['query'] : self::QUERY_BOOL;
     }
 
+    public function getParser()
+    {
+        return $this->config['parser'];
+    }
+
     public function getDelimiter()
     {
         $keys = $this->getResponseKeys();

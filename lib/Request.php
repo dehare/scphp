@@ -35,24 +35,7 @@ class Request
         $data  = self::execute();
         $flags = API::filterFlags(self::$_cmd, $flags);
 
-        if (! in_array(API::FLAG_RAW, $flags)) {
-            switch (self::$_cmd->getQuery()) {
-                case Command::QUERY_ARRAY:
-                    $result = self::getArray($data, $flags);
-                    break;
-                case Command::QUERY_BOOL:
-                    $result = self::validateBoolean($data);
-                    break;
-                case Command::QUERY_SUCCESS:
-                    $result = ! empty($data);
-                    break;
-                case Command::QUERY_INT:
-                    $result = self::validateInteger($data);
-                    break;
-                default:
-                    $result = $data;
-            }
-        }
+        $result = self::parse($data, $flags);
 
         self::$_repos[self::$_active_repo]->registerCommand(self::$_cmd);
         self::$_cmd = null;
@@ -72,81 +55,69 @@ class Request
     }
 
     /**
-     * Parse result to array
+     * Send command to CLI and parse resultset to usable data
+     *
+     * @param Command|null $command
+     *
+     * @return string
+     */
+    public static function execute(Command $command = null)
+    {
+        if (! empty($command)) {
+            self::$_cmd = $command;
+        }
+
+        $command = self::$_cmd->getCommand();
+
+        $result = false;
+        $io     = fwrite(Connection::socket(), $command . self::LF);
+        if ($io) {
+            $result  = fgets(Connection::socket());
+            $command = rtrim($command, "? " . self::LF);
+            $result  = trim(rtrim(str_replace([$command, self::$_cmd->getEscapedCommand()], '', $result), "\n"));
+        }
+
+        return trim($result);
+    }
+
+    /**
+     * Parse data into usable return format
      *
      * @param string $data
-     * @param array  $flags Data transformers
+     * @param array $flags
      *
-     * @return array
+     * @return mixed
      */
-    public function getArray($data, array $flags = [])
+    private function parse($data, array $flags = [])
     {
-        $results = [];
-        if (in_array(API::FLAG_COUNT_ONLY, $flags)) {
-            $count = -1;
-            if (preg_match('/count%3A(\d+)$/', $data, $m)) {
-                $count = $m[1];
-            }
-
-            return ['count' => intval($count)];
+        if (in_array(API::FLAG_RAW, $flags)) {
+            return $data;
         }
 
-        $delimiter = self::$_cmd->getDelimiter();
+        $query = self::$_cmd->getQuery();
+        $parser = self::$_cmd->getParser();
 
-        $data = $delimiter ? array_filter(explode(' ' . $delimiter, ' ' . $data)) : (array)$data;
-        foreach ($data as $d) {
-            $line       = [];
-            $columns    = explode(' ', $d);
-            $columns[0] = $delimiter . $columns[0];
-
-            array_walk($columns, function ($v) use (&$line) {
-                $v                           = urldecode($v);
-                $line[strstr($v, ':', true)] = ltrim(strstr($v, ':'), ':');
-            });
-
-            if (in_array(API::FLAG_FILL_KEYS, $flags)) {
-                $keys = self::$_cmd->getResponseKeys();
-                array_walk($keys, function ($key) use (&$line) {
-                    if (! isset($line[$key])) {
-                        $line[$key] = null;
-                    }
-                });
-            }
-
-            $line = array_filter($line, function ($v) {
-                return (is_array($v) && ! empty($v)) || $v != '';
-            });
-
-            if (! empty($line)) {
-                $results[] = $line;
-            }
-        }
-
-
-        $rc = count($results);
-        if (! empty($results) && isset($results[$rc - 1]['count'])) {
-            $count = $results[$rc - 1]['count'];
-            unset($results[$rc - 1]['count']);
-        }
-        $results = array_filter($results);
-
-        if (in_array(API::FLAG_UNWRAP_KEYS, $flags)) {
-            $keys = self::$_cmd->getResponseKeys();
-            if (count($keys) == 1) {
-                $result = array_column($results, $keys[0]);
-            }
-        }
-
-        if (! isset($result)) {
-            $result = compact('results', 'count');
-            if (in_array(API::FLAG_UNWRAP, $flags)) {
-                if (count($results) == 1) {
-                    $result = $results[0];
-                }
+        if ($parser) {
+            $parser = new $parser(self::$_cmd, $flags);
+            $result = $parser->parse($data);
+        } else {
+            switch ($query) {
+                case Command::QUERY_BOOL:
+                    $result = self::validateBoolean($data);
+                    break;
+                case Command::QUERY_INT:
+                    $result = self::validateInteger($data);
+                    break;
+                case Command::QUERY_SUCCESS:
+                    $result = ! empty($data);
+                    break;
+                default:
+                    $result = $data;
             }
         }
 
         return $result;
+
     }
 
     /**
@@ -181,32 +152,6 @@ class Request
         }
 
         return 0;
-    }
-
-    /**
-     * Send command to CLI and parse resultset to usable data
-     *
-     * @param Command|null $command
-     *
-     * @return string
-     */
-    public static function execute(Command $command = null)
-    {
-        if (! empty($command)) {
-            self::$_cmd = $command;
-        }
-
-        $command = self::$_cmd->getCommand();
-
-        $result = false;
-        $io     = fwrite(Connection::socket(), $command . self::LF);
-        if ($io) {
-            $result  = fgets(Connection::socket());
-            $command = rtrim($command, "? " . self::LF);
-            $result  = trim(rtrim(str_replace([$command, self::$_cmd->getEscapedCommand()], '', $result), "\n"));
-        }
-
-        return trim($result);
     }
 
     /**

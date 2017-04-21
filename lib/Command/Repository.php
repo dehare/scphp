@@ -3,6 +3,7 @@
 namespace Dehare\SCPHP\Command;
 
 use Dehare\SCPHP\API;
+use Dehare\SCPHP\Parser\ArrayParser;
 
 class Repository
 {
@@ -56,6 +57,7 @@ class Repository
             $cmd['filters']  = ! empty($cmd['filters']) ? $cmd['filters'] : [];
             $cmd['limit']    = ! empty($cmd['limit']) ? $cmd['limit'] : false;
             $cmd['query']    = ! empty($cmd['query']) ? $cmd['query'] : Command::QUERY_SUCCESS;
+            $cmd['parser']    = ! empty($cmd['parser']) ? $cmd['parser'] : ($cmd['query'] == Command::QUERY_ARRAY ? ArrayParser::class : null);
         }
     }
 }

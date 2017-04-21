@@ -8,9 +8,9 @@ use Dehare\SCPHP\Command\Command;
  */
 
 $cmd = [
-    'info'     => [
+    'count'    => [
         'query'    => Command::QUERY_INT,
-        'prefix'   => 'total',
+        '_command' => 'info total',
         'suffix'   => '?',
         'commands' => ['genres', 'artists', 'albums', 'songs', 'duration'],
     ],
@@ -141,6 +141,7 @@ $cmd = [
     ],
     'titles'   => [
         'query'      => Command::QUERY_ARRAY,
+        'limit'      => 10,
         'parameters' => [
             'search'    => null,
             'genre_id'  => null,
@@ -171,6 +172,27 @@ $cmd = [
             's' => 'textkey',
             'u' => 'url',
             '_' => ['u'],
+        ],
+    ],
+    'search'   => [
+        'query'        => Command::QUERY_ARRAY,
+        'parser'    => \Dehare\SCPHP\Parser\SearchParser::class,
+        'limit'        => 25,
+        'parameters'   => [
+            'term' => null,
+        ],
+        'requirements' => ['term'],
+        'response'     => [
+            'rescan',
+            'count',
+            'artist_count',
+            'albums_count',
+            'genres_count',
+            'tracks_count',
+            'artists' => ['artist_id', 'artist'],
+            'albums'  => ['album_id', 'album'],
+            'genres'  => ['genre_id', 'genre'],
+            'tracks'  => ['track_id', 'track'],
         ],
     ],
 ];

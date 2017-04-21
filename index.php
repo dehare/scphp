@@ -52,11 +52,11 @@ Connection::connect();
         </tr>
         <tr>
             <td>Total albums</td>
-            <td><?= Request::query('database:info:albums') ?></td>
+            <td><?= Request::query('database:count:albums') ?></td>
         </tr>
         <tr>
             <td>Total songs</td>
-            <td><?= Request::query('database:info:songs') ?></td>
+            <td><?= Request::query('database:count:songs') ?></td>
         </tr>
         <tr>
             <td>List years</td>
@@ -69,6 +69,10 @@ Connection::connect();
         <tr>
             <td>Tracks</td>
             <td><?php var_dump(Request::query('database:songs')) ?></td>
+        </tr>
+        <tr>
+            <td>Search</td>
+            <td><?php var_dump(Request::query('database:search', ['term' => 'li'])) ?></td>
         </tr>
     </table>
 </body>
