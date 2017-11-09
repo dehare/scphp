@@ -72,6 +72,8 @@ class API
         $possible = array_keys(self::getFlags($query));
         $flags    = array_keys(array_filter(array_replace($default_flags, $flags)));
 
-        return array_diff_assoc($flags, $possible);
+        return array_filter($flags, function($v) use ($possible) {
+            return in_array($v, $possible);
+        });
     }
 }
