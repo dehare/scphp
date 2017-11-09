@@ -10,7 +10,7 @@ function display($data)
         $result .= $line;
         $result .= '</td>';
         $result .= '<td>';
-        $result .= $value;
+        $result .= is_array($value) && count($value[key($value)]) > 1 ?  display($value) : (is_array($value) ? implode('; ', $value) : $value);
         $result .= '</td>';
         $result .= '</tr>';
     }
