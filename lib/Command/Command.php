@@ -185,8 +185,13 @@ class Command
 
         if (! empty($tags)) {
             if (is_array($tags)) {
-                $unused_tags = array_diff($tags, array_keys($c_tags));
-                $tags        = array_diff($tags, $unused_tags);
+                if (count($tags) === 1 && ($tags[0] === '*' || $tags[0] === '_')) {
+                    unset($c_tags['_']);
+                    $tags = array_keys($c_tags);
+                } else {
+                    $unused_tags = array_diff(array_keys($c_tags), $tags);
+                    $tags        = array_diff($tags, $unused_tags);
+                }
             } elseif ($tags === '*') {
                 unset($c_tags['_']);
                 $tags = array_keys($c_tags);
