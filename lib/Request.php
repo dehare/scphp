@@ -4,6 +4,7 @@ namespace Dehare\SCPHP;
 
 use Dehare\SCPHP\Command\Command;
 use Dehare\SCPHP\Command\Repository;
+use Dehare\SCPHP\Parser\ParserInterface;
 
 class Request
 {
@@ -88,13 +89,14 @@ class Request
      *
      * @return mixed
      */
-    private function parse($data, array $flags = [])
+    private static function parse($data, array $flags = [])
     {
         if (in_array(API::FLAG_RAW, $flags)) {
             return $data;
         }
 
         $query = self::$_cmd->getQuery();
+        /** @var ParserInterface $parser */
         $parser = self::$_cmd->getParser();
 
         if ($parser) {
@@ -127,7 +129,7 @@ class Request
      *
      * @return bool
      */
-    public function validateBoolean($data)
+    public static function validateBoolean($data)
     {
         if (preg_match('/(\w\s)+/', $data)) {
             trigger_error("Could not determine boolean on \"$data\"", E_USER_WARNING);
@@ -145,7 +147,7 @@ class Request
      *
      * @return int
      */
-    public function validateInteger($data)
+    public static function validateInteger($data)
     {
         if (preg_match('/(\d)+/', $data, $m)) {
             return intval($m[1]);
