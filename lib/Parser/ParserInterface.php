@@ -5,6 +5,7 @@ namespace Dehare\SCPHP\Parser;
 
 
 use Dehare\SCPHP\Command\Command;
+use Dehare\SCPHP\Parser\Result\ResultInterface;
 
 interface ParserInterface
 {

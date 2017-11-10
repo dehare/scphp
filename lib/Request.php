@@ -5,6 +5,7 @@ namespace Dehare\SCPHP;
 use Dehare\SCPHP\Command\Command;
 use Dehare\SCPHP\Command\Repository;
 use Dehare\SCPHP\Parser\ParserInterface;
+use Dehare\SCPHP\Parser\Result\ResultInterface;
 
 class Request
 {
@@ -24,7 +25,7 @@ class Request
      * @param array  $params
      * @param array  $flags
      *
-     * @return array|bool|int|mixed|string
+     * @return mixed|ResultInterface
      *
      * @todo add link to docs
      */
@@ -87,7 +88,7 @@ class Request
      * @param string $data
      * @param array $flags
      *
-     * @return mixed
+     * @return mixed|ResultInterface
      */
     private static function parse($data, array $flags = [])
     {

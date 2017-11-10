@@ -60,7 +60,7 @@ Connection::connect();
         </tr>
         <tr>
             <td>List years</td>
-            <td><?= display(Request::query('database:years')) ?></td>
+            <td><?= var_dump(Request::query('database:years')) ?></td>
         </tr>
         <tr>
             <td>Media folder</td>
